@@ -525,7 +525,7 @@ function showBankrupt(pi){
   for(k=0;k<22;k++)cf+='<i class="cf bill" style="--c:#c0392b;--dx:'+Math.round(Math.random()*300-150)+'px;--dy:'+(60+Math.round(Math.random()*140))+'px;--r:'+Math.round(Math.random()*540-270)+'deg"></i>';
   popOpen('<div class="popwrap"><div class="deed bk">'+whoHTML([pi])+'<div class="db" style="background:var(--warn)"></div><div class="cardico" style="background:var(--warn)">✕</div><div class="dn">Faliment!</div><div class="stamp" style="border-color:var(--warn);color:var(--warn)">FALIT</div></div>'+cf+'</div>',[60,40,60,40,90],3400);
 }
-function showBuy(i,pi){
+function showBuy(i,pi,amt){
   if(!G)return;
   var t=T[i],q=G.pl[pi];if(!q)return;
   var col=t.g?'var('+GC[t.g]+')':'var(--mute)';
@@ -536,7 +536,7 @@ function showBuy(i,pi){
     var ang=(k/16)*Math.PI*2+Math.random()*0.4,dist=80+Math.random()*80;
     cf+='<i class="cf" style="--c:'+cols[k%cols.length]+';--dx:'+Math.round(Math.cos(ang)*dist)+'px;--dy:'+Math.round(Math.sin(ang)*dist-20)+'px;--r:'+Math.round(Math.random()*540-270)+'deg"></i>';
   }
-  popOpen('<div class="popwrap"><div class="deed">'+whoHTML([pi])+'<div class="db" style="background:'+col+';height:12px"></div><div class="cardico" style="background:'+col+'">'+ico(t.i)+'</div><div class="dn">'+esc(t.n)+'</div><div class="dk">'+kind+'</div><div class="stamp">CUMPĂRAT</div><div class="rv loss" style="font-size:46px;animation:none">−'+t.p+' lei</div></div>'+cf+'</div>',[30,40,30]);
+  popOpen('<div class="popwrap"><div class="deed">'+whoHTML([pi])+'<div class="db" style="background:'+col+';height:12px"></div><div class="cardico" style="background:'+col+'">'+ico(t.i)+'</div><div class="dn">'+esc(t.n)+'</div><div class="dk">'+kind+'</div><div class="stamp">CUMPĂRAT</div><div class="rv loss" style="font-size:46px;animation:none">−'+(amt||t.p)+' lei</div></div>'+cf+'</div>',[30,40,30]);
 }
 function showCard(kind,x,pi){
   if(!G||!G.pl[pi])return;
@@ -710,6 +710,7 @@ function land(){
       if(!s){
         if(p.cash>=t.p){G.phase='buy';return;}
         logm(p.name+' nu are destui bani pentru '+t.n+' ('+t.p+' lei).');
+        if(startAuction(i))return;
       }else if(s.o!==G.cur&&!s.m){
         var r=rentOf(i);
         logm(p.name+' plătește chirie '+r+' lei lui '+G.pl[s.o].name+'.');
@@ -765,7 +766,7 @@ function buy(){
   logm(p.name+' cumpără '+t.n+' cu '+t.p+' lei.');
   G.phase='x';fin();
 }
-function skip(){if(G.phase!=='buy')return;logm(cp().name+' nu cumpără '+T[cp().pos].n+'.');G.phase='x';fin();}
+function skip(){if(G.phase!=='buy')return;logm(cp().name+' nu cumpără '+T[cp().pos].n+'.');if(startAuction(cp().pos))return;G.phase='x';fin();}
 function payDebt(){
   var d=G.debt,p=G.pl[d.pi];
   if(!d||p.cash<d.amt)return;
@@ -799,7 +800,7 @@ function bankrupt(){
 function nextTurn(){
   var n=G.cur;
   do{n=(n+1)%G.pl.length;}while(G.pl[n].dead);
-  G.cur=n;G.bt=false;G.trade=null;G.dbl=0;G.phase='roll';G.debt=null;G.sheet=null;railPl=null;G.turns=(G.turns||0)+1;G.tk=(G.tk||0)+1;if(Date.now()>bkUntil)clearPop();popFree=0;
+  G.cur=n;G.auc=null;G.bt=false;G.trade=null;G.dbl=0;G.phase='roll';G.debt=null;G.sheet=null;railPl=null;G.turns=(G.turns||0)+1;G.tk=(G.tk||0)+1;if(Date.now()>bkUntil)clearPop();popFree=0;
   if(G.turns>=400){endByWealth();return;}
   logm('Rândul lui '+G.pl[n].name+'.');
 }
@@ -839,7 +840,7 @@ function aiRaise(){
 function aiStep(){
   timer=null;
   if(screen!=='game'||!G||G.over!==null)return;
-  var p=cp();if(!p.ai)return;MP.act=true;G.trade=null;
+  var p=cp();if(!p.ai||G.phase==='auction')return;MP.act=true;G.trade=null;
   switch(G.phase){
     case 'roll':
       aiManage();
@@ -1024,6 +1025,7 @@ function peekHTML(){
 function centerActions(){
   var p=cp();
   if(G.over!==null)return '<div class="cbtns"><button class="btn big" data-a="newgame">Joc nou</button></div>';
+  if(G.auc)return aucHTML();
   if(G.trade){var tp=G.pl[G.trade.to];return (!p.ai&&mine())?'<p class="wait">Ofertă trimisă către '+esc(tp.name)+'…</p><div class="cbtns"><button class="btn ghost" data-a="trcancel">Anulează oferta</button></div>':'<p class="wait">'+esc(p.name)+' propune un schimb lui '+esc(tp.name)+'…</p>';}
   if(MP.on&&!p.ai&&!mine())return '<p class="wait">'+(MP.seats[G.cur]?'Așteaptă: '+esc(p.name)+' joacă…':esc(p.name)+' nu s-a conectat încă.')+'</p>';
   if(p.ai)return '<p class="wait">'+esc(p.name)+' joacă…</p>';
@@ -1133,7 +1135,7 @@ function render(){
   app.innerHTML=screen==='setup'?setupHTML():(MP.on&&G&&G.started===false?lobbyHTML():gameHTML());
   if(kv!==null&&app.querySelector){var n2=app.querySelector('#myname');if(n2){n2.value=kv;if(kf)n2.focus();}}
   if(rs&&app.querySelector){var nr=app.querySelector('.rail');if(nr)nr.scrollTop=rs;}
-  if(screen==='game'){if(!shown||shown.length!==G.pl.length)shown=G.pl.map(function(q){return q.pos;});drawPawns();planWalk();save();schedule();aiTrade();if(animNow){animNow=false;rollAnim(G.dice.slice());}}
+  if(screen==='game'){if(!shown||shown.length!==G.pl.length)shown=G.pl.map(function(q){return q.pos;});drawPawns();planWalk();save();schedule();aiTrade();aiAuction();if(animNow){animNow=false;rollAnim(G.dice.slice());}}
 }
 
 /* ---------- evenimente ---------- */
@@ -1162,9 +1164,10 @@ function act(a,i){
   if(a==='rpl'){railPl=i;railOpen=true;render();goRail();return;}
   if(a==='newgame'){mpFree();mpLeave();mpMsg='';clearPop();clearSave();saved=null;shown=null;railOpen=false;railPl=null;railWas=false;screen='setup';if(timer){clearTimeout(timer);timer=null;}G=null;render();return;}
   if(G.over!==null)return;
+  if(a==='abid'||a==='apass'){if(iAmBidder()){aucAct(G.auc.act,a==='abid'?i:null);MP.act=true;}render();return;}
   if(trAct(a,i))return;
   if(a==='wealth'){endByWealth();MP.act=true;render();return;}
-  if(cp().ai||!mine()||G.trade)return;
+  if(cp().ai||!mine()||G.trade||G.auc)return;
   MP.act=true;
   switch(a){
     case 'roll':if(G.phase==='roll')roll();break;
@@ -1427,6 +1430,72 @@ mb.addEventListener('click',function(e){
   if(musicOn)musicStart();else musicStop();mLabel();
 });
 document.addEventListener('pointerdown',function(){if(musicOn&&!mTimer)musicStart();});
+
+/* ---------- licitație ---------- */
+var auT=null;
+function iAmBidder(){return !!(G&&G.auc&&MP.on&&!G.pl[G.auc.act].ai&&MP.seats[G.auc.act]===MP.id);}
+function showAuction(i){
+  var t=T[i],col=t.g?'var('+GC[t.g]+')':'var(--mute)';
+  popOpen('<div class="popwrap"><div class="deed"><div class="db" style="background:'+col+'"></div><div class="cardico" style="background:'+col+'">'+ico(t.i)+'</div><div class="dn">'+esc(t.n)+'</div><div class="dk">Licitație</div><div class="stamp">DE LA '+t.p+' LEI</div></div></div>',[20,30,20],2600);
+}
+function startAuction(i){
+  var t=T[i],el=[],k,q;
+  for(k=1;k<=G.pl.length;k++){q=(G.cur+k)%G.pl.length;if(!G.pl[q].dead&&G.pl[q].cash>=t.p)el.push(q);}
+  if(!el.length){logm('Nimeni nu poate licita pentru '+t.n+'.');return false;}
+  G.auc={i:i,bid:0,by:null,min:t.p,els:el,out:[],act:el[0]};
+  G.phase='auction';logm('Licitație pentru '+t.n+', de la '+t.p+' lei.');sfx('card');showAuction(i);
+  return true;
+}
+function aucNext(from){
+  var a=G.auc,n=a.els.length,pos=a.els.indexOf(from),s,c;
+  for(s=1;s<=n;s++){
+    c=a.els[(pos+s)%n];
+    if(a.out.indexOf(c)>=0||c===a.by)continue;
+    if(G.pl[c].cash<(a.by===null?a.min:a.bid+10)){a.out.push(c);continue;}
+    a.act=c;return true;
+  }
+  return false;
+}
+function endAuction(){
+  var a=G.auc;G.auc=null;
+  if(a.by!==null){
+    var w=G.pl[a.by];w.cash-=a.bid;G.pr[a.i]={o:a.by,h:0,m:false};
+    logm(w.name+' câștigă licitația pentru '+T[a.i].n+' cu '+a.bid+' lei.');sfx('buy');showBuy(a.i,a.by,a.bid);
+  }else logm('Nimeni nu a licitat pentru '+T[a.i].n+'.');
+  G.phase='x';fin();
+}
+function aucAct(pi,bid){
+  var a=G.auc;if(!a||a.act!==pi)return;
+  if(bid===null){a.out.push(pi);logm(G.pl[pi].name+' renunță la licitație.');}
+  else{
+    var base=a.by===null?a.min:a.bid+10;
+    if(bid<base||bid>G.pl[pi].cash)return;
+    a.bid=bid;a.by=pi;logm(G.pl[pi].name+' licitează '+bid+' lei.');sfx('pay');
+  }
+  if(!aucNext(pi))endAuction();
+}
+function aiAuction(){
+  if(auT||!G||!G.auc||G.over!==null)return;
+  var a=G.auc,q=G.pl[a.act];
+  if(!q||!q.ai||(MP.on&&!MP.host))return;
+  auT=setTimeout(function(){
+    auT=null;if(!G||G.auc!==a)return;
+    var base=a.by===null?a.min:a.bid+10,t=T[a.i],mult=1;
+    if(t.t==='p'){var g=grp(t.g),n=g.filter(function(j){return j!==a.i&&G.pr[j]&&G.pr[j].o===a.act;}).length;if(n===g.length-1)mult=1.9;else if(n>0)mult=1.25;}
+    else if(t.t==='st')mult=1.2;
+    var mx=Math.min(q.cash-(mult>1.5?0:100),Math.round(t.p*mult));
+    aucAct(a.act,base<=mx?base:null);MP.act=true;render();
+  },1300);
+}
+function aucHTML(){
+  var a=G.auc,t=T[a.i],cur=G.pl[a.act];
+  var h='<p class="msg" style="font-weight:700">Licitație: '+esc(t.n)+'</p><p class="hint" style="text-align:center">'+(a.by===null?'Preț minim: '+a.min+' lei':'Oferta curentă: <b>'+a.bid+' lei</b> ('+esc(G.pl[a.by].name)+')')+'</p>';
+  if(iAmBidder()){
+    var base=a.by===null?a.min:a.bid+10,me=G.pl[a.act];
+    h+='<div class="cbtns">'+[0,50,100].map(function(x){var v=base+x;return '<button class="btn'+(x?' ghost':' big pulse')+'" data-a="abid" data-i="'+v+'"'+(v>me.cash?' disabled':'')+'>Licitez '+v+' lei</button>';}).join('')+'<button class="btn ghost" data-a="apass">Renunț</button></div>';
+  }else h+='<p class="wait">Licitează: '+esc(cur.name)+'…</p>';
+  return h;
+}
 
 saved=loadSave();
 render();
