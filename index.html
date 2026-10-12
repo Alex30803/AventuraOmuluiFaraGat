@@ -624,7 +624,7 @@ function minH(g){return Math.min.apply(null,grp(g).map(function(i){return G.pr[i
 function maxH(g){return Math.max.apply(null,grp(g).map(function(i){return G.pr[i]?G.pr[i].h:0;}));}
 function canBuild(i){
   var t=T[i],s=G.pr[i],p=cp();
-  if(!s||s.o!==G.cur||t.t!=='p'||!hasSet(G.cur,t.g))return false;
+  if(G.bt||!s||s.o!==G.cur||t.t!=='p'||!hasSet(G.cur,t.g))return false;
   if(grp(t.g).some(function(j){return G.pr[j].m;}))return false;
   return s.h<5&&s.h===minH(t.g)&&p.cash>=t.h;
 }
@@ -640,7 +640,7 @@ function canMort(i){
 }
 function unCost(i){return Math.ceil(T[i].p/2*1.1);}
 function canUnmort(i){var s=G.pr[i];return !!(s&&s.o===G.cur&&s.m&&cp().cash>=unCost(i));}
-function doBuild(i){if(!canBuild(i))return;cp().cash-=T[i].h;G.pr[i].h++;sfx('build');if(!cp().ai)moneyPop('loss','Construcție',T[i].n,T[i].h,[{k:G.cur,a:-T[i].h}],-1);logm(cp().name+' construiește la '+T[i].n+(G.pr[i].h===5?' un hotel.':' (case: '+G.pr[i].h+').'));}
+function doBuild(i){if(!canBuild(i))return;cp().cash-=T[i].h;G.pr[i].h++;G.bt=true;sfx('build');if(!cp().ai)moneyPop('loss','Construcție',T[i].n,T[i].h,[{k:G.cur,a:-T[i].h}],-1);logm(cp().name+' construiește la '+T[i].n+(G.pr[i].h===5?' un hotel.':' (case: '+G.pr[i].h+').'));}
 function doSell(i){if(!canSell(i))return;cp().cash+=T[i].h/2;G.pr[i].h--;if(!cp().ai){sfx('earn');moneyPop('gain','Vânzare clădire',T[i].n,T[i].h/2,[{k:G.cur,a:T[i].h/2}],-1);}logm(cp().name+' vinde o clădire la '+T[i].n+'.');}
 function doMort(i){if(!canMort(i))return;G.pr[i].m=true;cp().cash+=T[i].p/2;if(!cp().ai){sfx('earn');moneyPop('gain','Ipotecă',T[i].n,T[i].p/2,[{k:G.cur,a:T[i].p/2}],-1);}logm(cp().name+' ipotechează '+T[i].n+'.');}
 function doUnmort(i){if(!canUnmort(i))return;cp().cash-=unCost(i);G.pr[i].m=false;if(!cp().ai){sfx('pay');moneyPop('loss','Răscumpărare',T[i].n,unCost(i),[{k:G.cur,a:-unCost(i)}],-1);}logm(cp().name+' răscumpără '+T[i].n+'.');}
@@ -799,7 +799,7 @@ function bankrupt(){
 function nextTurn(){
   var n=G.cur;
   do{n=(n+1)%G.pl.length;}while(G.pl[n].dead);
-  G.cur=n;G.trade=null;G.dbl=0;G.phase='roll';G.debt=null;G.sheet=null;railPl=null;G.turns=(G.turns||0)+1;G.tk=(G.tk||0)+1;if(Date.now()>bkUntil)clearPop();popFree=0;
+  G.cur=n;G.bt=false;G.trade=null;G.dbl=0;G.phase='roll';G.debt=null;G.sheet=null;railPl=null;G.turns=(G.turns||0)+1;G.tk=(G.tk||0)+1;if(Date.now()>bkUntil)clearPop();popFree=0;
   if(G.turns>=400){endByWealth();return;}
   logm('Rândul lui '+G.pl[n].name+'.');
 }
@@ -1014,7 +1014,7 @@ function railHTML(){
   return (railOpen?'<div class="rail-bg"></div>':'')+
     '<aside class="rail'+(railOpen?' open'+(railAnim?' anim':''):'')+'" aria-label="Cartonașe"><div class="rhead"><h2>Cartonașe</h2><button class="btn ghost sm rclose" data-a="railclose">Închide</button></div>'+
     '<div class="rchips">'+chips+'</div><div class="rcash">În cont: <b>'+q.cash+' lei</b> · '+o.length+' proprietăți</div>'+
-    '<div class="rcards">'+cards+'</div>'+(canAct&&o.length?'<p class="hint">Construiești doar când ai toate orașele unei culori, câte o casă pe rând la fiecare.</p>':'')+'</aside>';
+    '<div class="rcards">'+cards+'</div>'+(canAct&&o.length?'<p class="hint">Construiești doar când ai toate orașele unei culori, câte o casă pe rând la fiecare. Maxim o casă pe rundă.'+(G.bt?' Ai construit deja în runda asta.':'')+'</p>':'')+'</aside>';
 }
 function peekHTML(){
   var o=sortedOwned(G.cur);
