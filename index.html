@@ -1,8 +1,73 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}.setup{max-width:580px;margin:0 auto;gap:18px;padding-top:8px}
+.setup .hero{display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;padding:18px 8px 8px;border-radius:18px;background:radial-gradient(ellipse at 50% 0,color-mix(in srgb,var(--acc) 22%,transparent),transparent 72%)}
+.setup .hero h1,.setup>h1{font-size:clamp(34px,10vw,58px);line-height:.98}
+.setup .strip{display:flex;width:min(220px,60%);height:8px;margin:0 auto;border-radius:999px;overflow:hidden}
+.setup .tag{max-width:40ch;text-align:center;font-size:15px}
+.setup .status{align-self:center;padding:8px 16px;border-radius:999px;background:var(--panel);border:1px solid var(--acc);color:var(--ink);font-size:14px;text-align:center}
+.setup .cards{display:grid;grid-template-columns:1fr;gap:16px;align-items:start}
+@media (min-width:760px){.setup{max-width:900px}.setup .cards{grid-template-columns:1.25fr 1fr}}
+.setup .card{display:flex;flex-direction:column;gap:12px;padding:18px;border-radius:16px;background:var(--panel);border:1px solid var(--line);box-shadow:0 8px 28px rgba(0,0,0,.14)}
+.setup .card h2{font-size:26px;line-height:1}
+.setup .kick{font-size:11px;letter-spacing:.2em;text-transform:uppercase;font-weight:700;color:var(--acc)}
+.setup .note{font-size:13px;margin:0}
+.setup .rows{display:flex;flex-direction:column;gap:8px}
+.setup .seg{border-radius:999px;min-height:42px}
+.setup .prow input{border-radius:10px}
+.tog{display:flex;flex:0 0 auto;padding:3px;gap:2px;border:1.5px solid var(--line);border-radius:999px;background:var(--cell);cursor:pointer;min-height:42px}
+.tog span{display:grid;place-items:center;padding:0 11px;border-radius:999px;font:600 13px var(--f-body);color:var(--mute)}
+.tog span.on{background:var(--acc);color:var(--acc-ink)}
+.setup .codein{min-height:64px;text-align:center;text-transform:uppercase;font:800 38px var(--f-disp);letter-spacing:.35em;padding:0 0 0 .35em;border:2px dashed var(--acc);border-radius:12px;background:var(--cell);color:var(--ink)}
+.setup .codein::placeholder{color:var(--mute);opacity:.5}
+.setup .card .btn.big{width:100%;margin-top:4px}
+.setup .rules{border:1px solid var(--line);border-radius:12px;padding:10px 14px;background:var(--cell)}
+.setup .rules summary{cursor:pointer;font-family:var(--f-disp);font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--mute)}
+.setup .rules p{margin-top:8px;font-size:14px}
+
+.board{--ink:#10261c;--line:#4b6657;--cell:#cde9d8;--panel:#c3e3cf;--mute:#35503f;border:3px solid #10261c;border-radius:6px;box-shadow:0 6px 22px rgba(0,0,0,.28)}
+.board .cell.pc{background:var(--cell)}
+.board .cell.corner{background:#e3f3e8}
+.board .die{background:#fff;border-color:#10261c}
+.cmap{opacity:.2}
+.deco{position:absolute;inset:0;overflow:hidden;z-index:0;pointer-events:none}
+.deco .ban{position:absolute;left:50%;top:50%;width:155%;height:15%;transform:translate(-50%,-50%) rotate(-38deg);background:#d9262e;display:grid;place-items:center;box-shadow:0 0 0 3px #fff,0 0 0 4px rgba(0,0,0,.4),0 6px 14px rgba(0,0,0,.3)}
+.deco .ban span{color:#fff;font:800 clamp(11px,3.3vw,28px)/1 var(--f-disp);letter-spacing:.09em;text-shadow:0 2px 0 rgba(0,0,0,.25);white-space:nowrap}
+.deco .dk{position:absolute;width:26%;aspect-ratio:3/2;border-radius:6px;border:2px solid #fff;display:grid;place-items:center;color:#fff;transform:rotate(-13deg)}
+.deco .dk b{font:800 clamp(16px,5vw,34px)/1 var(--f-disp);display:grid;place-items:center}
+.deco .dk b .ico{width:clamp(16px,5vw,32px);height:clamp(16px,5vw,32px)}
+.deco .dk1{left:4%;top:5%;background:#4a9de0;box-shadow:4px 4px 0 #fff,6px 6px 0 rgba(0,0,0,.2)}
+.deco .dk2{right:4%;bottom:5%;background:#f08a24;box-shadow:-4px -4px 0 #fff,-6px -6px 0 rgba(0,0,0,.2)}
+.cpanel{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:8px;max-width:100%;padding:8px 10px;border-radius:14px;background:color-mix(in srgb,var(--cell) 94%,transparent);border:1.5px solid var(--ink);box-shadow:0 3px 10px rgba(0,0,0,.2)}
+.board .cell.pc .tx{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;min-width:0;min-height:0;width:100%;gap:1px}
+.board .cell.pc .tx .nm{margin:0;max-width:100%;max-height:100%;overflow:hidden}
+.board .cell.pc .tx .pr{margin:0}
+.board .cell.st.pc{flex-direction:column-reverse}
+.board .cell.st.pc .tx{transform:rotate(180deg)}
+.board .cell.sl.pc{flex-direction:row-reverse}
+.board .cell.sr.pc{flex-direction:row}
+.board .cell.sl.pc .band,.board .cell.sr.pc .band{width:24%;min-width:8px;height:100%}
+.board .cell.sl.pc .tx,.board .cell.sr.pc .tx{writing-mode:vertical-rl;width:auto;height:100%}
+.board .cell.sr.pc .tx{transform:rotate(180deg)}
+
+.board .cell.pc .tx .nm{font-size:clamp(8px,2.45vw,14px);font-weight:800;color:#08170f;letter-spacing:-.03em}
+.board .cell.pc .tx .pr{font-size:clamp(7.5px,2.2vw,12.5px);font-weight:800;color:#08170f}
+.board .cell.st.pc .tx{transform:none}
+.board .die{width:clamp(40px,12vw,58px);border-radius:14px;background:linear-gradient(145deg,#fff 0%,#f1f5ef 55%,#d9e2d8 100%);border:2px solid #10261c;padding:17%;box-shadow:inset 0 2px 3px #fff,inset 0 -3px 5px rgba(0,0,0,.16),0 4px 0 #0c1d15,0 8px 12px rgba(0,0,0,.35)}
+.board .die i{width:78%}
+.board .die i.on{background:radial-gradient(circle at 35% 30%,#4a4a4a,#050505 70%);box-shadow:inset 0 -1px 2px rgba(255,255,255,.25)}
+.board .die.d1 i.on{background:radial-gradient(circle at 35% 30%,#ff7b7b,#b3121a 70%);width:100%}
+.board .dice{gap:12px;padding-bottom:6px}
+
+.board .cell .nm,.board .cell .pr{font-family:'Barlow Condensed','Arial Narrow',Impact,sans-serif;font-weight:800;letter-spacing:0}
+.board .cell.pc .tx .nm{font-size:clamp(9px,2.8vw,15.5px);letter-spacing:0}
+.board .cell.pc .tx .pr{font-size:clamp(8.5px,2.5vw,14px)}
+.board .die{padding:11%}
+.board .die i{width:96%}
+.board .die.d1 i.on{width:100%;transform:scale(1.45)}
+</style></head><body>
 <title>Aventura omului fără gât</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans+Condensed:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans+Condensed:wght@400;500;600&family=Barlow+Condensed:wght@700;800&display=swap">
 <style>
 /* Layout: o tablă pătrată 11x11 cu centrul pentru zaruri și mesaje, bara de acțiuni dedesubt, jurnal la final.
    Aspect: plan cadastral, hârtie gri-albăstruie, cerneală închisă, accent petrol. */
@@ -246,60 +311,6 @@ h1,h2{font-family:var(--f-disp);font-weight:800;text-transform:uppercase;letter-
 <div id="app"></div>
 <script>
 (function(){
-if(window.claude)return;
-var ws=null,ready=null,uid=null,subs={},cols={},docs={},msgH={},peersL=[],pres=null;
-try{uid=sessionStorage.getItem('av-uid');}catch(e){}
-if(!uid){uid='u'+Math.random().toString(36).slice(2,10)+Date.now().toString(36);try{sessionStorage.setItem('av-uid',uid);}catch(e){}}
-function snap(id,d){return {id:id,exists:d!=null,data:function(){return d==null?undefined:d;},metadata:{}};}
-function send(m){if(ws&&ws.readyState===1)ws.send(JSON.stringify(m));}
-function fire(c,ch){var a=Object.keys(c.cache).map(function(id){return snap(id,c.cache[id]);});c.cbs.forEach(function(cb){cb({docs:a,size:a.length,empty:!a.length,docChanges:function(){return ch;},metadata:{}});});}
-function onMsg(e){
-  var m,c;try{m=JSON.parse(e.data);}catch(x){return;}
-  if(m.t==='doc'){(docs[m.path]||[]).slice().forEach(function(cb){cb(snap(m.path.split('/').pop(),m.data));});}
-  else if(m.t==='col'){c=cols[m.path];if(!c)return;var old=c.cache,nw={},ch=[];m.docs.forEach(function(d){nw[d.id]=d.data;});
-    Object.keys(nw).forEach(function(id){if(!(id in old))ch.push({type:'added',doc:snap(id,nw[id])});else if(JSON.stringify(old[id])!==JSON.stringify(nw[id]))ch.push({type:'modified',doc:snap(id,nw[id])});});
-    Object.keys(old).forEach(function(id){if(!(id in nw))ch.push({type:'removed',doc:snap(id,old[id])});});
-    c.cache=nw;fire(c,ch);}
-  else if(m.t==='chg'){c=cols[m.col];if(!c)return;var had=m.id in c.cache,ty;
-    if(m.data==null){delete c.cache[m.id];ty='removed';}else{c.cache[m.id]=m.data;ty=had?'modified':'added';}
-    fire(c,[{type:ty,doc:snap(m.id,m.data)}]);}
-  else if(m.t==='msg'){(msgH[m.topic]||[]).slice().forEach(function(f){try{f({topic:m.topic,data:m.data,isMe:false,peer:m.peer});}catch(x){}});}
-  else if(m.t==='peers'){peersL=m.peers||[];}
-}
-function connect(){return new Promise(function(res,rej){
-  var done=false;ws=new WebSocket((location.protocol==='https:'?'wss://':'ws://')+location.host);
-  ws.onopen=function(){done=true;send({t:'hello'});Object.keys(subs).forEach(function(k){send(subs[k]);});if(pres)send({t:'pres',data:pres});res();};
-  ws.onmessage=onMsg;
-  ws.onerror=function(){if(!done)rej(new Error('ws'));};
-  ws.onclose=function(){if(!done){rej(new Error('ws'));return;}setTimeout(relink,2000);};
-});}
-function relink(){connect().catch(function(){setTimeout(relink,2000);});}
-function connectOnce(){
-  if(!ready){ready=(async function(){for(var i=0;i<8;i++){try{await connect();return;}catch(e){await new Promise(function(r){setTimeout(r,4000);});}}throw new Error('x');})();ready.catch(function(){ready=null;});}
-  return ready;
-}
-setInterval(function(){send({t:'ping'});},25000);
-var db={
-  doc:function(p){return {
-    set:function(d){send({t:'set',path:p,data:d});return Promise.resolve();},
-    delete:function(){send({t:'del',path:p});return Promise.resolve();},
-    onSnapshot:function(cb){(docs[p]=docs[p]||[]).push(cb);var m={t:'subdoc',path:p};subs['d:'+p]=m;send(m);return function(){docs[p]=(docs[p]||[]).filter(function(x){return x!==cb;});};}
-  };},
-  collection:function(p){return {onSnapshot:function(cb){
-    var c=cols[p]=cols[p]||{cache:{},cbs:[]};c.cbs.push(cb);var m={t:'subcol',path:p};subs['c:'+p]=m;send(m);
-    return function(){c.cbs=c.cbs.filter(function(x){return x!==cb;});};
-  }};}
-};
-var room={
-  emit:function(t,d){send({t:'emit',topic:t,data:d});return Promise.resolve();},
-  on:function(t,f){(msgH[t]=msgH[t]||[]).push(f);return function(){msgH[t]=(msgH[t]||[]).filter(function(x){return x!==f;});};},
-  presence:function(p){pres=p;send({t:'pres',data:p});return Promise.resolve();},
-  peers:function(){return peersL;}
-};
-var user={id:function(){return Promise.resolve(uid);}};
-window.claude={use:function(n){return connectOnce().then(function(){return n==='db'?db:(n==='user'?user:(n==='room'?room:null));});}};
-})();
-(function(){
 'use strict';
 var KEY='cartiere-v1';
 var app=document.getElementById('app');
@@ -310,50 +321,50 @@ var GORDER=['brn','lbl','pnk','org','red','yel','grn','blu'];
 
 var T=[
  {t:'start',n:'Start',i:'arrow'},
- {t:'p',n:'Giulești',g:'brn',p:60,h:50,r:[2,10,30,90,160,250],i:'ball'},
- {t:'chest',n:'Cufăr',i:'chest'},
- {t:'p',n:'Militari',g:'brn',p:60,h:50,r:[4,20,60,180,320,450],i:'blocks'},
+ {t:'p',n:'Rahova',g:'brn',p:60,h:50,r:[2,10,30,90,160,250],i:'ball'},
+ {t:'chest',n:'Cufărul comunității',i:'chest'},
+ {t:'p',n:'Giulești',g:'brn',p:60,h:50,r:[4,20,60,180,320,450],i:'blocks'},
  {t:'tax',n:'Impozit pe venit',a:200,i:'percent'},
- {t:'st',n:'Gara de Nord',p:200,i:'train'},
- {t:'p',n:'Pantelimon',g:'lbl',p:100,h:50,r:[6,30,90,270,400,550],i:'waves'},
+ {t:'st',n:'Gara Progresul',p:200,i:'train'},
+ {t:'p',n:'Balta Albă',g:'lbl',p:100,h:50,r:[6,30,90,270,400,550],i:'waves'},
  {t:'chance',n:'Șansă',i:'q'},
- {t:'p',n:'Berceni',g:'lbl',p:100,h:50,r:[6,30,90,270,400,550],i:'tree'},
- {t:'p',n:'Titan',g:'lbl',p:120,h:50,r:[8,40,100,300,450,600],i:'tower'},
+ {t:'p',n:'Pantelimon',g:'lbl',p:100,h:50,r:[6,30,90,270,400,550],i:'tree'},
+ {t:'p',n:'Berceni',g:'lbl',p:120,h:50,r:[8,40,100,300,450,600],i:'tower'},
  {t:'jail',n:'Închisoare',i:'bars'},
- {t:'p',n:'Colentina',g:'pnk',p:140,h:100,r:[10,50,150,450,625,750],i:'waves'},
- {t:'ut',n:'Electrica',p:150,i:'bolt'},
- {t:'p',n:'Drumul Taberei',g:'pnk',p:140,h:100,r:[10,50,150,450,625,750],i:'blocks'},
- {t:'p',n:'Crângași',g:'pnk',p:160,h:100,r:[12,60,180,500,700,900],i:'tram'},
- {t:'st',n:'Gara Obor',p:200,i:'train'},
- {t:'p',n:'Vitan',g:'org',p:180,h:100,r:[14,70,200,550,750,950],i:'cart'},
- {t:'chest',n:'Cufăr',i:'chest'},
- {t:'p',n:'Mihai Bravu',g:'org',p:180,h:100,r:[14,70,200,550,750,950],i:'tram'},
- {t:'p',n:'Piața Unirii',g:'org',p:200,h:100,r:[16,80,220,600,800,1000],i:'fountain'},
- {t:'park',n:'Parcare',i:'park'},
- {t:'p',n:'Floreasca',g:'red',p:220,h:150,r:[18,90,250,700,875,1050],i:'sail'},
+ {t:'p',n:'Titan',g:'pnk',p:140,h:100,r:[10,50,150,450,625,750],i:'waves'},
+ {t:'ut',n:'Uzina Electrică',p:150,i:'bolt'},
+ {t:'p',n:'Colentina',g:'pnk',p:140,h:100,r:[10,50,150,450,625,750],i:'blocks'},
+ {t:'p',n:'Tei',g:'pnk',p:160,h:100,r:[12,60,180,500,700,900],i:'tram'},
+ {t:'st',n:'Gara de Sud',p:200,i:'train'},
+ {t:'p',n:'B-dul Timișoara',g:'org',p:180,h:100,r:[14,70,200,550,750,950],i:'cart'},
+ {t:'chest',n:'Cufărul comunității',i:'chest'},
+ {t:'p',n:'B-dul Brașov',g:'org',p:180,h:100,r:[14,70,200,550,750,950],i:'tram'},
+ {t:'p',n:'Drumul Taberei',g:'org',p:200,h:100,r:[16,80,220,600,800,1000],i:'fountain'},
+ {t:'park',n:'Parcare gratuită',i:'park'},
+ {t:'p',n:'B-dul Carol',g:'red',p:220,h:150,r:[18,90,250,700,875,1050],i:'sail'},
  {t:'chance',n:'Șansă',i:'q'},
- {t:'p',n:'Dorobanți',g:'red',p:220,h:150,r:[18,90,250,700,875,1050],i:'house'},
- {t:'p',n:'Cotroceni',g:'red',p:240,h:150,r:[20,100,300,750,925,1100],i:'palace'},
+ {t:'p',n:'B-dul Kogălniceanu',g:'red',p:220,h:150,r:[18,90,250,700,875,1050],i:'house'},
+ {t:'p',n:'B-dul Eroilor',g:'red',p:240,h:150,r:[20,100,300,750,925,1100],i:'palace'},
  {t:'st',n:'Gara Basarab',p:200,i:'train'},
- {t:'p',n:'Lipscani',g:'yel',p:260,h:150,r:[22,110,330,800,975,1150],i:'cup'},
- {t:'p',n:'Universitate',g:'yel',p:260,h:150,r:[22,110,330,800,975,1150],i:'book'},
- {t:'ut',n:'Apa Nova',p:150,i:'drop'},
- {t:'p',n:'Cișmigiu',g:'yel',p:280,h:150,r:[24,120,360,850,1025,1200],i:'tree'},
- {t:'gojail',n:'Mergi la închisoare',i:'warn'},
- {t:'p',n:'Ateneul Român',g:'grn',p:300,h:200,r:[26,130,390,900,1100,1275],i:'dome'},
- {t:'p',n:'Arcul de Triumf',g:'grn',p:300,h:200,r:[26,130,390,900,1100,1275],i:'arch'},
- {t:'chest',n:'Cufăr',i:'chest'},
- {t:'p',n:'Herăstrău',g:'grn',p:320,h:200,r:[28,150,450,1000,1200,1400],i:'sail'},
- {t:'st',n:'Gara Băneasa',p:200,i:'train'},
+ {t:'p',n:'B-dul Titulescu',g:'yel',p:260,h:150,r:[22,110,330,800,975,1150],i:'cup'},
+ {t:'p',n:'B-dul 1 Mai',g:'yel',p:260,h:150,r:[22,110,330,800,975,1150],i:'book'},
+ {t:'ut',n:'Uzina de apă',p:150,i:'drop'},
+ {t:'p',n:'Calea Dorobanților',g:'yel',p:280,h:150,r:[24,120,360,850,1025,1200],i:'tree'},
+ {t:'gojail',n:'Du-te la închisoare',i:'warn'},
+ {t:'p',n:'Piața Unirii',g:'grn',p:300,h:200,r:[26,130,390,900,1100,1275],i:'dome'},
+ {t:'p',n:'Cotroceni',g:'grn',p:300,h:200,r:[26,130,390,900,1100,1275],i:'arch'},
+ {t:'chest',n:'Cufărul comunității',i:'chest'},
+ {t:'p',n:'Calea Victoriei',g:'grn',p:320,h:200,r:[28,150,450,1000,1200,1400],i:'sail'},
+ {t:'st',n:'Gara de Nord',p:200,i:'train'},
  {t:'chance',n:'Șansă',i:'q'},
- {t:'p',n:'Calea Victoriei',g:'blu',p:350,h:200,r:[35,175,500,1100,1300,1500],i:'lamp'},
+ {t:'p',n:'Șoseaua Kiseleff',g:'blu',p:350,h:200,r:[35,175,500,1100,1300,1500],i:'lamp'},
  {t:'tax',n:'Taxă de lux',a:100,i:'gem'},
- {t:'p',n:'Palatul Parlamentului',g:'blu',p:400,h:200,r:[50,200,600,1400,1700,2000],i:'parl'}
+ {t:'p',n:'B-dul Primăverii',g:'blu',p:400,h:200,r:[50,200,600,1400,1700,2000],i:'parl'}
 ];
 var CH=[
  {x:'Câștigi un concurs de poezie la Ateneu: primești 100 lei.',k:'gain',v:100},
  {x:'Mergi direct la Start.',k:'to',v:0},
- {x:'Avansezi până la Calea Victoriei.',k:'to',v:37},
+ {x:'Avansezi până la B-dul Primăverii.',k:'to',v:39},
  {x:'Avansezi până la Gara Basarab.',k:'to',v:25},
  {x:'Amendă pentru parcare în Centrul Vechi: plătești 50 lei.',k:'gain',v:-50},
  {x:'Mergi 3 locuri înapoi.',k:'back'},
@@ -361,7 +372,7 @@ var CH=[
  {x:'Reparații la clădiri: 25 lei pe casă și 100 lei pe hotel.',k:'repair',a:25,b:100},
  {x:'Ești ales președinte de asociație: plătești 40 lei fiecărui jucător.',k:'split',v:40},
  {x:'Dividende: primești 150 lei.',k:'gain',v:150},
- {x:'Avansezi până la Cotroceni.',k:'to',v:24}
+ {x:'Avansezi până la Cotroceni.',k:'to',v:32}
 ];
 var CF=[
  {x:'Moștenire de la o mătușă din Dorobanți: primești 200 lei.',k:'gain',v:200},
@@ -370,7 +381,7 @@ var CF=[
  {x:'Zi de naștere: fiecare jucător îți dă 20 lei.',k:'collect',v:20},
  {x:'Factura la întreținere: plătești 75 lei.',k:'gain',v:-75},
  {x:'Restituire de impozit: primești 20 lei.',k:'gain',v:20},
- {x:'Te întorci la Giulești.',k:'to',v:1},
+ {x:'Te întorci la Rahova.',k:'to',v:1},
  {x:'Reparații stradale: 40 lei pe casă și 115 lei pe hotel.',k:'repair',a:40,b:115},
  {x:'Câștigi la loterie: primești 100 lei.',k:'gain',v:100},
  {x:'Mergi direct la închisoare.',k:'jail'}
@@ -733,6 +744,7 @@ function land(){
 }
 function roll(){
   var p=cp(),a=rd(),b=rd();
+  if((G.turns||0)<2*G.pl.length&&!p.jail){for(var tr=0;tr<8&&(p.pos+a+b)%40===4&&Math.random()<0.85;tr++){a=rd();b=rd();}}
   G.dice=[a,b];G.fresh=true;lastRoll=Date.now();ld=0.85;sfx('roll');
   if(p.jail){
     if(a===b){
@@ -843,20 +855,20 @@ function aiStep(){
   var p=cp();if(!p.ai||G.phase==='auction')return;MP.act=true;G.trade=null;
   switch(G.phase){
     case 'roll':
-      aiManage();
-      if(p.jail&&p.cash>300)payJail();else roll();
+      if(!p.bot)aiManage();
+      if(p.jail&&p.cash>300&&!p.bot)payJail();else roll();
       break;
     case 'buy':
       var t=T[p.pos];
       var full=t.g&&grp(t.g).every(function(j){return j===p.pos||(G.pr[j]&&G.pr[j].o===G.cur);});
-      if(p.cash-t.p>=100||full)buy();else skip();
+      if(!p.bot&&(p.cash-t.p>=100||full))buy();else skip();
       break;
     case 'debt':
-      aiRaise();
-      if(p.cash>=G.debt.amt)payDebt();else bankrupt();
+      if(!p.bot)aiRaise();
+      if(p.cash>=G.debt.amt)payDebt();else if(p.bot){MP.act=false;return;}else bankrupt();
       break;
     case 'end':
-      aiManage();endTurn();break;
+      if(!p.bot)aiManage();endTurn();break;
   }
   render();
 }
@@ -954,13 +966,13 @@ function walkTick(){
   if(stepped)sfx('step');
   if(more)walkT=setTimeout(walkTick,STEP);
 }
-var SHORT={'Giulești':'Giuleș.','Militari':'Militari','Impozit pe venit':'Impozit','Gara de Nord':'Nord','Pantelimon':'Pantel.','Berceni':'Berceni','Titan':'Titan','Colentina':'Colent.','Electrica':'Electr.','Drumul Taberei':'Taberei','Crângași':'Crâng.','Gara Obor':'Obor','Vitan':'Vitan','Mihai Bravu':'Bravu','Piața Unirii':'Unirii','Parcare':'Parcare','Floreasca':'Florea.','Dorobanți':'Dorob.','Cotroceni':'Cotroc.','Gara Basarab':'Basarab','Lipscani':'Lipscani','Universitate':'Univ.','Apa Nova':'Apa','Cișmigiu':'Cișmig.','Mergi la închisoare':'Arest','Ateneul Român':'Ateneu','Arcul de Triumf':'Arcul','Herăstrău':'Herăs.','Gara Băneasa':'Bănea.','Calea Victoriei':'Victor.','Taxă de lux':'Lux','Palatul Parlamentului':'Parlam.','Închisoare':'Închis.'};
+var SHORT={'Rahova': 'Rahova', 'Cufărul comunității': 'Cufăr', 'Giulești': 'Giuleș.', 'Impozit pe venit': 'Impozit', 'Gara Progresul': 'Progres.', 'Balta Albă': 'Balta A.', 'Pantelimon': 'Pantel.', 'Berceni': 'Berceni', 'Închisoare': 'Închis.', 'Titan': 'Titan', 'Uzina Electrică': 'Uzina El.', 'Colentina': 'Colent.', 'Tei': 'Tei', 'Gara de Sud': 'Gara Sud', 'B-dul Timișoara': 'Timiș.', 'B-dul Brașov': 'Brașov', 'Drumul Taberei': 'Taberei', 'Parcare gratuită': 'Parcare', 'B-dul Carol': 'Carol', 'B-dul Kogălniceanu': 'Kogăln.', 'B-dul Eroilor': 'Eroilor', 'Gara Basarab': 'Basarab', 'B-dul Titulescu': 'Titul.', 'B-dul 1 Mai': '1 Mai', 'Uzina de apă': 'Uzina Ap.', 'Calea Dorobanților': 'Dorob.', 'Du-te la închisoare': 'Arest', 'Piața Unirii': 'Unirii', 'Cotroceni': 'Cotroc.', 'Calea Victoriei': 'Victor.', 'Gara de Nord': 'Gara Nord', 'Șoseaua Kiseleff': 'Kisel.', 'Taxă de lux': 'Taxă lux', 'B-dul Primăverii': 'Primăv.', 'Șansă': 'Șansă'};
 function shortName(t){return SHORT[t.n]||t.n;}
 function cellInner(i){
   var t=T[i],s=G.pr[i],h='',nm='<span class="nm">'+esc(shortName(t))+'</span>',pr=function(v){return '<span class="pr">'+v+'</span>';};
   if(t.t==='p'){
     var band='<span class="bp">'+t.p+'</span>';
-    h+='<span class="band" style="background:var('+GC[t.g]+')">'+band+'</span><span class="ci">'+ico(t.i)+'</span>'+nm;
+    h+='<span class="band" style="background:var('+GC[t.g]+')"></span><span class="tx">'+nm+pr(t.p)+'</span>';
   }else if(t.t==='st'||t.t==='ut'){h+='<span class="ci big">'+ico(t.i)+'</span>'+nm+pr(t.p);}
   else if(t.t==='tax'){h+='<span class="ci big">'+ico(t.i)+'</span>'+nm+pr(t.a);}
   else{h+='<span class="ci big">'+ico(t.i)+'</span>'+nm;}
@@ -969,7 +981,7 @@ function cellInner(i){
 }
 var PIPS=[[],[4],[0,8],[0,4,8],[0,2,6,8],[0,2,4,6,8],[0,2,3,5,6,8]];
 function die(n){
-  var h='<div class="die" aria-label="zar '+n+'">';
+  var h='<div class="die d'+n+'" aria-label="zar '+n+'">';
   for(var k=0;k<9;k++)h+='<i'+(PIPS[n].indexOf(k)>=0?' class="on"':'')+'></i>';
   return h+'</div>';
 }
@@ -1086,18 +1098,18 @@ function gameHTML(){
   var p=cp(),h='<div class="layout"><div class="main">';
   h+='<div class="top"><div class="brand"><img class="logo" alt="Logo" src="'+LOGO+'"><div><h1>Aventura omului fără gât</h1><div class="ed">Ediția București</div></div></div><div style="display:flex;gap:8px">'+(MP.on?'<button class="btn sm" data-a="copy">Cod '+MP.code+'</button>':'')+'<button class="btn ghost sm" data-a="mute" aria-pressed="'+(!muted)+'">'+(muted?'Sunet oprit':'Sunet pornit')+'</button><button class="btn ghost sm" data-a="menu">Meniu</button></div></div>';
   h+='<div class="players">'+G.pl.map(function(q,k){
-    return '<div class="pl'+(k===G.cur&&G.over===null?' on':'')+(q.dead?' dead':'')+'" data-a="rpl" data-i="'+k+'" style="--c:var(--p'+k+')"><span class="tk" style="--c:var(--p'+k+')">'+esc(initial(q.name))+'</span><div><b>'+esc(q.name)+(q.ai?' <small>calc.</small>':'')+'</b><div class="cash">'+q.cash+' lei'+(q.jail?' · închis':'')+'</div></div></div>';
+    return '<div class="pl'+(k===G.cur&&G.over===null?' on':'')+(q.dead?' dead':'')+'" data-a="rpl" data-i="'+k+'" style="--c:var(--p'+k+')"><span class="tk" style="--c:var(--p'+k+')">'+esc(initial(q.name))+'</span><div><b>'+esc(q.name)+(q.bot?' <small>deconectat</small>':(q.ai?' <small>calc.</small>':''))+'</b><div class="cash">'+q.cash+' lei'+(q.jail?' · închis':'')+'</div></div></div>';
   }).join('')+'</div>';
   var cells='';
   for(var i=0;i<40;i++){
     var t=T[i],s=G.pr[i];
-    var cls='cell'+(t.t==='p'?' pc':' c0')+((i%10===0)?' corner':'')+(s&&s.m?' mort':'');
+    var cls='cell'+(t.t==='p'?' pc':' c0')+((i%10===0)?' corner':(i<10?' sb':(i<20?' sl':(i<30?' st':' sr'))))+(s&&s.m?' mort':'');
     cells+='<button class="'+cls+'" style="'+cellPos(i)+(t.g?';--g:var('+GC[t.g]+')':'')+'" data-a="tile" data-i="'+i+'" aria-label="'+esc(t.n)+'">'+cellInner(i)+'</button>';
   }
   h+='<div class="board">'+cells+
-    '<div class="center">'+MAP+'<div class="turn"><span class="tk" style="--c:var(--p'+G.cur+')">'+esc(initial(p.name))+'</span>'+esc(p.name)+'</div>'+
+    '<div class="center">'+MAP+decoHTML()+'<div class="cpanel"><div class="turn"><span class="tk" style="--c:var(--p'+G.cur+')">'+esc(initial(p.name))+'</span>'+esc(p.name)+'</div>'+
     '<div class="dice'+(G.fresh?' rolling':'')+'">'+die(G.dice[0])+die(G.dice[1])+'</div>'+
-    '<p class="msg">'+esc(G.log[0]||'')+'</p>'+centerActions()+'</div><div class="pawns" id="pawns"></div><div class="houses">'+housesHTML()+'</div></div>';
+    '<p class="msg">'+esc(G.log[0]||'')+'</p>'+centerActions()+'</div></div><div class="pawns" id="pawns"></div><div class="houses">'+housesHTML()+'</div></div>';
   animNow=G.fresh;G.fresh=false;
   h+='<ul class="log">'+G.log.slice(0,8).map(function(l){return '<li>'+esc(l)+'</li>';}).join('')+'</ul>';
   h+='</div>'+railHTML()+'</div>'+(railOpen?'':peekHTML())+sheetHTML()+offerHTML();
@@ -1115,18 +1127,17 @@ function lobbyHTML(){
 }
 function setupHTML(){
   var bands=GORDER.map(function(g){return '<i style="background:var('+GC[g]+')"></i>';}).join('');
+  var nums=[2,3,4,5,6].map(function(n){return '<button class="seg'+(setup.n===n?' on':'')+'" data-a="setn" data-i="'+n+'" aria-pressed="'+(setup.n===n)+'">'+n+'</button>';}).join('');
   var rows='';
   for(var i=0;i<setup.n;i++){
-    rows+='<div class="prow"><span class="tk" style="--c:var(--p'+i+')">'+(i+1)+'</span><input id="pn'+i+'" data-i="'+i+'" maxlength="14" value="'+esc(setup.names[i])+'" aria-label="Nume jucător '+(i+1)+'"><button class="seg on" data-a="settype" data-i="'+i+'">'+(setup.t[i]==='h'?'Om':'Calculator')+'</button></div>';
+    var hu=setup.t[i]==='h';
+    rows+='<div class="prow"><span class="tk" style="--c:var(--p'+i+')">'+(i+1)+'</span><input id="pn'+i+'" data-i="'+i+'" maxlength="14" value="'+esc(setup.names[i])+'" aria-label="Nume jucător '+(i+1)+'"><button class="tog" data-a="settype" data-i="'+i+'" aria-label="Schimbă tipul jucătorului '+(i+1)+'"><span class="'+(hu?'on':'')+'">Om</span><span class="'+(hu?'':'on')+'">Calculator</span></button></div>';
   }
-  var h='<div class="setup"><div class="strip">'+bands+'</div><img class="logo xl" alt="Logo" src="'+LOGO+'"><div><h1>Aventura omului fără gât</h1><div class="ed" style="margin-top:6px">Ediția București</div></div>'+
-    '<p>Cumperi cartiere și locuri celebre din București, construiești case și hoteluri, iei chirii. Ultimul jucător rămas câștigă. Fiecare începe cu 1500 lei și primește 200 lei la trecerea pe Start.</p>'+
-    '<div><div class="lbl">Număr de jucători</div><div class="segs" style="margin-top:8px">'+[2,3,4,5,6].map(function(n){return '<button class="seg'+(setup.n===n?' on':'')+'" data-a="setn" data-i="'+n+'" aria-pressed="'+(setup.n===n)+'">'+n+'</button>';}).join('')+'</div></div>'+
-    '<div style="display:flex;flex-direction:column;gap:8px"><div class="lbl">Jucători</div>'+rows+'<p style="font-size:13px">Atinge „Om” sau „Calculator” ca să schimbi tipul. Locurile „Om” sunt ocupate de jucători conectați.</p></div>'+
-    '<div style="display:flex;flex-direction:column;gap:8px"><div class="lbl">Online</div><p style="font-size:13px">Până la 6 jucători. Creezi camera, apoi ceilalți intră cu codul. Locurile „Om” sunt pentru jucători conectați.</p><button class="btn" data-a="mpcreate">Creează cameră</button><div class="prow"><input id="mpcode" maxlength="4" placeholder="COD" value="'+esc(mpCode)+'"><button class="btn ghost" data-a="mpjoin" style="flex:0 0 auto">Intră în cameră</button></div>'+(mpMsg?'<p style="font-size:13px">'+esc(mpMsg)+'</p>':'')+'</div>'+
-
-    '</div>';
-  return h;
+  return '<div class="setup"><header class="hero"><img class="logo xl" alt="Logo" src="'+LOGO+'"><h1>Aventura omului fără gât</h1><div class="ed">Ediția București</div><div class="strip">'+bands+'</div><p class="tag">Cumperi cartiere, construiești case și hoteluri, încasezi chirii. Ultimul jucător rămas câștigă.</p></header>'+
+    (mpMsg?'<div class="status" role="status">'+esc(mpMsg)+'</div>':'')+
+    '<div class="cards"><section class="card"><div class="kick">Gazdă</div><h2>Creează o cameră</h2><div class="lbl">Număr de jucători</div><div class="segs">'+nums+'</div><div class="lbl">Jucători</div><div class="rows">'+rows+'</div><p class="note">„Om” = jucător conectat online. „Calculator” = jucat de bot.</p><button class="btn big" data-a="mpcreate">Creează camera</button></section>'+
+    '<section class="card"><div class="kick">Invitat</div><h2>Intră cu un cod</h2><p class="note">Cere gazdei codul din 4 caractere și scrie-l mai jos.</p><input id="mpcode" class="codein" maxlength="4" placeholder="COD" value="'+esc(mpCode)+'" autocomplete="off" autocapitalize="characters" aria-label="Codul camerei"><button class="btn big" data-a="mpjoin">Intră în cameră</button></section></div>'+
+    '<details class="rules"><summary>Cum se joacă</summary><p>Fiecare jucător începe cu 1500 lei și primește 200 lei la trecerea pe Start. Cumperi proprietăți, iar dacă nu cumperi, ele se licitează. Poți face schimburi, poți construi o casă pe rundă după ce ai un set întreg și încasezi chirii. Ultimul jucător rămas în joc câștigă.</p></details></div>';
 }
 function render(){
   var oldRail=app.querySelector?app.querySelector('.rail'):null,rs=oldRail?oldRail.scrollTop:0;
@@ -1234,7 +1245,7 @@ async function mpStart(create,code){
     var db=await claude.use('db'),u=await claude.use('user'),r=await claude.use('room');
     if(!db||!u)throw 0;
     MP.db=db;MP.id=await u.id();MP.room=r;if(!MP.id)throw 0;
-  }catch(e){mpMsg='Nu mă pot conecta la server. Încearcă din nou în câteva secunde.';render();return;}
+  }catch(e){mpMsg='Online funcționează doar din pagina publicată, cu cont conectat.';render();return;}
   mpLeave();
   MP.code=code;MP.on=true;MP.host=create;MP.claimed=false;MP.seats={};MP.names={};MP.n=0;MP.rs=0;
   if(MP.room){MP.room.presence({uid:MP.id});MP.off.push(MP.room.on('sfx',function(m){var d=m.data;if(!d||m.isMe||d.c!==MP.code||typeof d.name!=='string')return;remoteSfx=true;sfx(d.name,+d.d||0);remoteSfx=false;}));}
@@ -1249,7 +1260,7 @@ async function mpStart(create,code){
   }));
   MP.off.push(MP.db.doc('games/'+code).onSnapshot(function(s){if(s.exists)mpApply(s.data());}));
   if(create){MP.act=true;mpMsg='';newGame();}
-  else{mpMsg='Aștept camera '+code+'…';setTimeout(function(){if(MP.on&&MP.code===code&&!G){mpMsg='Nu găsesc camera '+code+'. Verifică codul sau cere gazdei să creeze camera.';render();}},6000);}
+  else mpMsg='Aștept camera '+code+'… (dacă nu apare, verifică codul)';
   render();
 }
 function mpSweep(){
@@ -1267,11 +1278,27 @@ function mpSweep(){
       var u=MP.seats[k];if(!u||q.dead||(q.ai&&!q.bot))return;
       var g=gone(u);
       if(G.started===false){if(g&&u!==MP.id){delete MP.seats[k];delete MP.names[k];MP.db.doc('games/'+MP.code+'/seats/'+k).delete().catch(function(){});ch=true;}}
-      else if(g&&!q.bot){q.ai=true;q.bot=true;ch=true;logm(q.name+' a ieșit: joacă un bot până revine.');}
-      else if(!g&&q.bot){q.ai=false;q.bot=false;ch=true;logm(q.name+' a revenit în joc.');}
+      else if(g&&!q.bot){q.ai=true;q.bot=true;q.botAt=now;ch=true;logm(q.name+' a ieșit: un bot dă doar cu zarul până revine (maxim 5 minute).');}
+      else if(!g&&q.bot){q.ai=false;q.bot=false;q.botAt=0;ch=true;logm(q.name+' a revenit în joc.');}
+      else if(g&&q.bot){if(!q.botAt){q.botAt=now;ch=true;}else if(now-q.botAt>300000){kickPlayer(k);ch=true;}}
     });
   }
   if(ch){MP.act=true;render();}
+}
+function kickPlayer(k){
+  var q=G.pl[k];if(!q||q.dead)return;
+  logm(q.name+' a fost eliminat: a lipsit peste 5 minute.');sfx('bank');
+  var wasCur=G.cur===k;
+  if(G.trade&&(G.trade.from===k||G.trade.to===k))G.trade=null;
+  if(G.auc){
+    if(wasCur)G.auc=null;
+    else{G.auc.out.push(k);if(G.auc.by===k){G.auc.by=null;G.auc.bid=0;}if(G.auc.act===k&&!aucNext(k))endAuction();}
+  }
+  Object.keys(G.pr).forEach(function(i){if(G.pr[i].o===k)delete G.pr[i];});
+  q.cash=0;q.dead=true;q.ai=true;
+  var alive=G.pl.filter(function(x){return !x.dead;});
+  if(alive.length<=1){G.over=G.pl.indexOf(alive[0]);G.phase='over';G.sheet={t:'over'};logm(alive[0].name+' a câștigat jocul.');sfx('win');return;}
+  if(wasCur){G.debt=null;nextTurn();}
 }
 function mpFree(){var k=mySeat();if(k>=0&&MP.db&&G&&G.started===false)MP.db.doc('games/'+MP.code+'/seats/'+k).delete().catch(function(){});}
 function mpLeave(){MP.off.forEach(function(f){try{f();}catch(e){}});MP.off=[];MP.on=false;MP.act=false;MP.seats={};}
@@ -1321,7 +1348,7 @@ function aiTrade(){
   if(trT||!G||!G.trade||G.over!==null)return;
   var t=G.trade,q=G.pl[t.to];
   if(!q||!q.ai||(MP.on&&!MP.host))return;
-  trT=setTimeout(function(){trT=null;if(!G||G.trade!==t)return;resolveTrade(aiEval(t));MP.act=true;render();},1800);
+  trT=setTimeout(function(){trT=null;if(!G||G.trade!==t)return;resolveTrade(!q.bot&&aiEval(t));MP.act=true;render();},1800);
 }
 function trCheck(){var b=app.querySelector?app.querySelector('[data-a="trsend"]'):null;if(b&&TD)b.disabled=!validTrade({from:G.cur,to:TD.to,give:TD.give,gc:TD.gc,get:TD.get,rc:TD.rc});}
 function tradeHTML(){
@@ -1484,7 +1511,7 @@ function aiAuction(){
     if(t.t==='p'){var g=grp(t.g),n=g.filter(function(j){return j!==a.i&&G.pr[j]&&G.pr[j].o===a.act;}).length;if(n===g.length-1)mult=1.9;else if(n>0)mult=1.25;}
     else if(t.t==='st')mult=1.2;
     var mx=Math.min(q.cash-(mult>1.5?0:100),Math.round(t.p*mult));
-    aucAct(a.act,base<=mx?base:null);MP.act=true;render();
+    aucAct(a.act,(!q.bot&&base<=mx)?base:null);MP.act=true;render();
   },1300);
 }
 function aucHTML(){
@@ -1495,6 +1522,10 @@ function aucHTML(){
     h+='<div class="cbtns">'+[0,50,100].map(function(x){var v=base+x;return '<button class="btn'+(x?' ghost':' big pulse')+'" data-a="abid" data-i="'+v+'"'+(v>me.cash?' disabled':'')+'>Licitez '+v+' lei</button>';}).join('')+'<button class="btn ghost" data-a="apass">Renunț</button></div>';
   }else h+='<p class="wait">Licitează: '+esc(cur.name)+'…</p>';
   return h;
+}
+
+function decoHTML(){
+  return '<div class="deco" aria-hidden="true"><div class="ban"><span>AVENTURA OMULUI FĂRĂ GÂT</span></div><div class="dk dk1"><b>'+ico('chest')+'</b></div><div class="dk dk2"><b>?</b></div></div>';
 }
 
 saved=loadSave();
