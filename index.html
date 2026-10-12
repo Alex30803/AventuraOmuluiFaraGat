@@ -137,6 +137,7 @@ h1,h2{font-family:var(--f-disp);font-weight:800;text-transform:uppercase;letter-
 .mrow .bt{display:flex;gap:6px;flex-wrap:wrap}
 .cardtxt{font-size:19px;margin:0}
 .setup{display:flex;flex-direction:column;gap:16px;padding-top:12px}
+.tp{display:flex;align-items:center;gap:8px;padding:6px 10px;text-align:left;min-height:40px;flex:none}.tp .sw{width:14px;height:14px;border-radius:3px;flex:none}.tl{display:flex;flex-direction:column;gap:6px}
 .codebig{font:800 clamp(56px,20vw,96px)/1 var(--f-disp);letter-spacing:.12em;text-align:center;padding:14px 8px;border:3px dashed var(--acc);border-radius:10px;background:var(--cell);color:var(--acc);cursor:pointer}
 .logo{display:block;width:52px;height:52px;border-radius:50%;object-fit:cover;border:2px solid var(--ink);flex:none;background:var(--cell)}
 .logo.xl{width:120px;height:120px;margin:0 auto;border-width:3px;box-shadow:0 0 0 4px var(--acc)}
@@ -786,7 +787,7 @@ function bankrupt(){
 function nextTurn(){
   var n=G.cur;
   do{n=(n+1)%G.pl.length;}while(G.pl[n].dead);
-  G.cur=n;G.dbl=0;G.phase='roll';G.debt=null;G.sheet=null;railPl=null;G.turns=(G.turns||0)+1;G.tk=(G.tk||0)+1;if(Date.now()>bkUntil)clearPop();popFree=0;
+  G.cur=n;G.trade=null;G.dbl=0;G.phase='roll';G.debt=null;G.sheet=null;railPl=null;G.turns=(G.turns||0)+1;G.tk=(G.tk||0)+1;if(Date.now()>bkUntil)clearPop();popFree=0;
   if(G.turns>=400){endByWealth();return;}
   logm('Rândul lui '+G.pl[n].name+'.');
 }
@@ -826,7 +827,7 @@ function aiRaise(){
 function aiStep(){
   timer=null;
   if(screen!=='game'||!G||G.over!==null)return;
-  var p=cp();if(!p.ai)return;MP.act=true;
+  var p=cp();if(!p.ai)return;MP.act=true;G.trade=null;
   switch(G.phase){
     case 'roll':
       aiManage();
@@ -1014,11 +1015,12 @@ function peekHTML(){
 function centerActions(){
   var p=cp();
   if(G.over!==null)return '<div class="cbtns"><button class="btn big" data-a="newgame">Joc nou</button></div>';
+  if(G.trade){var tp=G.pl[G.trade.to];return (!p.ai&&mine())?'<p class="wait">Ofertă trimisă către '+esc(tp.name)+'…</p><div class="cbtns"><button class="btn ghost" data-a="trcancel">Anulează oferta</button></div>':'<p class="wait">'+esc(p.name)+' propune un schimb lui '+esc(tp.name)+'…</p>';}
   if(MP.on&&!p.ai&&!mine())return '<p class="wait">'+(MP.seats[G.cur]?'Așteaptă: '+esc(p.name)+' joacă…':esc(p.name)+' nu s-a conectat încă.')+'</p>';
   if(p.ai)return '<p class="wait">'+esc(p.name)+' joacă…</p>';
   var h='<div class="cbtns">';
   if(G.phase==='roll'){
-    h+='<button class="btn big pulse" data-a="roll">Aruncă zarurile</button>';
+    h+='<button class="btn big pulse" data-a="roll">Aruncă zarurile</button><button class="btn ghost" data-a="tropen">Schimb</button>';
     if(p.jail)h+='<button class="btn ghost" data-a="jailpay"'+(p.cash<50?' disabled':'')+'>Plătește 50 lei și ieși</button>';
   }else if(G.phase==='buy'){
     var t=T[p.pos];
@@ -1027,7 +1029,7 @@ function centerActions(){
     h+='<p class="hint">Datorie '+G.debt.amt+' lei, ai '+p.cash+' lei. Ipotechează din cartonașe.</p>';
     h+='<button class="btn big" data-a="paydebt"'+(p.cash<G.debt.amt?' disabled':'')+'>Plătește '+G.debt.amt+' lei</button><button class="btn ghost" data-a="rail">Cartonașe</button><button class="btn ghost" data-a="bankrupt">Declar faliment</button>';
   }else if(G.phase==='end'){
-    h+='<button class="btn big pulse" data-a="end">Termină tura</button>';
+    h+='<button class="btn big pulse" data-a="end">Termină tura</button><button class="btn ghost" data-a="tropen">Schimb</button>';
   }
   return h+'</div>';
 }
@@ -1062,6 +1064,7 @@ function sheetHTML(){
     h+='<button class="btn" data-a="close">Închide</button>';
   }else if(sh.t==='menu'){
     h+='<h2>Meniu</h2><button class="btn ghost" data-a="close">Înapoi la joc</button><button class="btn ghost" data-a="wealth">Încheie partida: câștigă cel mai bogat</button><button class="btn" data-a="newgame">Joc nou</button><p class="hint">Partida se încheie singură după 400 de ture, iar câștigă jucătorul cu cea mai mare avere.</p>';
+  }else if(sh.t==='trade'){h+=tradeHTML();
   }else if(sh.t==='over'){
     var w=G.pl[G.over];
     h+='<h2>'+esc(w.name)+' a câștigat</h2><p>'+(G.byWealth?'Partida s-a încheiat și '+esc(w.name)+' are cea mai mare avere: '+G.byWealth+' lei, cu tot cu proprietăți.':'Ceilalți jucători au dat faliment. Avere finală: '+w.cash+' lei și '+owned(G.over).length+' proprietăți.')+'</p><button class="btn" data-a="newgame">Joc nou</button>';
@@ -1086,7 +1089,7 @@ function gameHTML(){
     '<p class="msg">'+esc(G.log[0]||'')+'</p>'+centerActions()+'</div><div class="pawns" id="pawns"></div></div>';
   animNow=G.fresh;G.fresh=false;
   h+='<ul class="log">'+G.log.slice(0,8).map(function(l){return '<li>'+esc(l)+'</li>';}).join('')+'</ul>';
-  h+='</div>'+railHTML()+'</div>'+(railOpen?'':peekHTML())+sheetHTML();
+  h+='</div>'+railHTML()+'</div>'+(railOpen?'':peekHTML())+sheetHTML()+offerHTML();
   return h;
 }
 function lobbyHTML(){
@@ -1121,7 +1124,7 @@ function render(){
   app.innerHTML=screen==='setup'?setupHTML():(MP.on&&G&&G.started===false?lobbyHTML():gameHTML());
   if(kv!==null&&app.querySelector){var n2=app.querySelector('#myname');if(n2){n2.value=kv;if(kf)n2.focus();}}
   if(rs&&app.querySelector){var nr=app.querySelector('.rail');if(nr)nr.scrollTop=rs;}
-  if(screen==='game'){if(!shown||shown.length!==G.pl.length)shown=G.pl.map(function(q){return q.pos;});drawPawns();planWalk();save();schedule();if(animNow){animNow=false;rollAnim(G.dice.slice());}}
+  if(screen==='game'){if(!shown||shown.length!==G.pl.length)shown=G.pl.map(function(q){return q.pos;});drawPawns();planWalk();save();schedule();aiTrade();if(animNow){animNow=false;rollAnim(G.dice.slice());}}
 }
 
 /* ---------- evenimente ---------- */
@@ -1150,8 +1153,9 @@ function act(a,i){
   if(a==='rpl'){railPl=i;railOpen=true;render();goRail();return;}
   if(a==='newgame'){mpFree();mpLeave();mpMsg='';clearPop();clearSave();saved=null;shown=null;railOpen=false;railPl=null;railWas=false;screen='setup';if(timer){clearTimeout(timer);timer=null;}G=null;render();return;}
   if(G.over!==null)return;
+  if(trAct(a,i))return;
   if(a==='wealth'){endByWealth();MP.act=true;render();return;}
-  if(cp().ai||!mine())return;
+  if(cp().ai||!mine()||G.trade)return;
   MP.act=true;
   switch(a){
     case 'roll':if(G.phase==='roll')roll();break;
@@ -1176,7 +1180,7 @@ app.addEventListener('click',function(e){
   act(b.getAttribute('data-a'),parseInt(b.getAttribute('data-i'),10));
 });
 app.addEventListener('input',function(e){
-  var el=e.target;if(el.id==='mpcode')mpCode=el.value.toUpperCase().replace(/[^A-Z0-9]/g,'');
+  var el=e.target;if(TD&&(el.id==='trgc'||el.id==='trrc')){var nv=Math.max(0,parseInt(el.value,10)||0);if(el.id==='trgc')TD.gc=nv;else TD.rc=nv;trCheck();return;}if(el.id==='mpcode')mpCode=el.value.toUpperCase().replace(/[^A-Z0-9]/g,'');
   if(el.id&&el.id.indexOf('pn')===0)setup.names[parseInt(el.getAttribute('data-i'),10)]=el.value;
 });
 
@@ -1259,6 +1263,104 @@ function mpSweep(){
 }
 function mpFree(){var k=mySeat();if(k>=0&&MP.db&&G&&G.started===false)MP.db.doc('games/'+MP.code+'/seats/'+k).delete().catch(function(){});}
 function mpLeave(){MP.off.forEach(function(f){try{f();}catch(e){}});MP.off=[];MP.on=false;MP.act=false;MP.seats={};}
+
+/* ---------- schimburi (trade) ---------- */
+var TD=null,trT=null;
+function tradables(pi){return owned(pi).filter(function(i){var x=T[i];return x.t!=='p'||grp(x.g).every(function(j){return !G.pr[j]||G.pr[j].h===0;});});}
+function descT(l,c){var a=l.map(function(i){return T[i].n;});if(c)a.push(c+' lei');return a.length?a.join(', '):'nimic';}
+function validTrade(t){
+  var a=G.pl[t.from],b=G.pl[t.to];
+  if(!a||!b||a.dead||b.dead||t.from===t.to)return false;
+  if(!t.give.length&&!t.get.length&&!t.gc&&!t.rc)return false;
+  if(t.gc>a.cash||t.rc>b.cash||t.gc<0||t.rc<0)return false;
+  var ta=tradables(t.from),tb=tradables(t.to);
+  return t.give.every(function(i){return ta.indexOf(i)>=0;})&&t.get.every(function(i){return tb.indexOf(i)>=0;});
+}
+function showTrade(t){
+  var pf=G.pl[t.from],pt=G.pl[t.to];
+  popOpen('<div class="popwrap"><div class="deed">'+whoHTML([t.from,t.to])+'<div class="db" style="background:var(--acc)"></div><div class="dk">Schimb încheiat</div><div class="stamp">ACCEPTAT</div><p class="ctx" style="font-size:21px"><b>'+esc(pf.name)+'</b> dă: '+esc(descT(t.give,t.gc))+'</p><p class="ctx" style="font-size:21px"><b>'+esc(pt.name)+'</b> dă: '+esc(descT(t.get,t.rc))+'</p></div></div>',[20,30,20],4200);
+}
+function execTrade(t){
+  if(!validTrade(t)){logm('Schimbul nu mai este valid.');return;}
+  var a=G.pl[t.from],b=G.pl[t.to];
+  t.give.forEach(function(i){G.pr[i].o=t.to;});t.get.forEach(function(i){G.pr[i].o=t.from;});
+  a.cash+=t.rc-t.gc;b.cash+=t.gc-t.rc;
+  logm('Schimb între '+a.name+' și '+b.name+': '+a.name+' dă '+descT(t.give,t.gc)+'; '+b.name+' dă '+descT(t.get,t.rc)+'.');
+  sfx('earn');showTrade(t);
+}
+function pv(i,pi,opp){
+  var x=T[i],s=G.pr[i],v=s&&s.m?x.p/2:x.p;
+  if(x.t==='p'){var g=grp(x.g),n=g.filter(function(j){return j!==i&&G.pr[j]&&G.pr[j].o===pi;}).length;if(n===g.length-1)v*=opp?1.8:2;else if(n>0)v*=1.2;}
+  else if(x.t==='st')v*=1.2;
+  return v;
+}
+function aiEval(t){
+  var R=t.gc,L=t.rc;
+  t.give.forEach(function(i){R+=pv(i,t.to,false);});
+  t.get.forEach(function(i){L+=Math.max(pv(i,t.to,false),pv(i,t.from,true));});
+  return R>=L*1.15&&R>0;
+}
+function resolveTrade(ok){
+  var t=G.trade;G.trade=null;if(!t)return;
+  if(ok)execTrade(t);else{logm(G.pl[t.to].name+' refuză schimbul.');sfx('pay');}
+}
+function iAmTarget(){return !!(G&&G.trade&&MP.on&&!G.pl[G.trade.to].ai&&MP.seats[G.trade.to]===MP.id);}
+function aiTrade(){
+  if(trT||!G||!G.trade||G.over!==null)return;
+  var t=G.trade,q=G.pl[t.to];
+  if(!q||!q.ai||(MP.on&&!MP.host))return;
+  trT=setTimeout(function(){trT=null;if(!G||G.trade!==t)return;resolveTrade(aiEval(t));MP.act=true;render();},1800);
+}
+function trCheck(){var b=app.querySelector?app.querySelector('[data-a="trsend"]'):null;if(b&&TD)b.disabled=!validTrade({from:G.cur,to:TD.to,give:TD.give,gc:TD.gc,get:TD.get,rc:TD.rc});}
+function tradeHTML(){
+  var me=G.cur,t=TD;if(!t)return '';
+  var others=[];G.pl.forEach(function(q,k){if(k!==me&&!q.dead)others.push(k);});
+  if(others.indexOf(t.to)<0)t.to=others[0];
+  var chips=others.map(function(k){return '<button class="rchip'+(k===t.to?' on':'')+'" style="--c:var(--p'+k+')" data-a="trto" data-i="'+k+'"><span class="tk" style="--c:var(--p'+k+')">'+esc(initial(G.pl[k].name))+'</span>'+esc(label(G.pl[k].name))+'</button>';}).join('');
+  function list(pi,sel,act){var o=tradables(pi);return o.length?o.map(function(i){var x=T[i];return '<button class="seg tp'+(sel.indexOf(i)>=0?' on':'')+'" data-a="'+act+'" data-i="'+i+'"><span class="sw" style="background:'+(x.g?'var('+GC[x.g]+')':'var(--mute)')+'"></span><span>'+esc(x.n)+(G.pr[i].m?' (ipotecat)':'')+' · '+x.p+' lei</span></button>';}).join(''):'<p class="hint">Nicio proprietate disponibilă (cele cu clădiri nu se pot schimba).</p>';}
+  var ok=validTrade({from:me,to:t.to,give:t.give,gc:t.gc,get:t.get,rc:t.rc});
+  return '<h2>Schimb</h2><div class="lbl">Cu cine</div><div class="rchips">'+chips+'</div>'+
+   '<div class="lbl">Tu dai</div><div class="tl">'+list(me,t.give,'trg')+'</div><div class="prow"><input id="trgc" type="number" inputmode="numeric" min="0" placeholder="+ bani (lei), ai '+G.pl[me].cash+'" value="'+(t.gc||'')+'" aria-label="Bani dați"></div>'+
+   '<div class="lbl">Primești de la '+esc(G.pl[t.to].name)+'</div><div class="tl">'+list(t.to,t.get,'trr')+'</div><div class="prow"><input id="trrc" type="number" inputmode="numeric" min="0" placeholder="+ bani (lei), are '+G.pl[t.to].cash+'" value="'+(t.rc||'')+'" aria-label="Bani primiți"></div>'+
+   '<button class="btn" data-a="trsend"'+(ok?'':' disabled')+'>Trimite oferta</button><button class="btn ghost" data-a="close">Renunță</button>';
+}
+function offerHTML(){
+  if(!iAmTarget()||G.trade.status!=='offer'||G.over!==null)return '';
+  var t=G.trade;
+  return '<div class="sheet-bg"><div class="sheet" role="dialog" aria-modal="true"><h2>Ofertă de schimb</h2><p>'+esc(G.pl[t.from].name)+' îți propune:</p><div>Primești: <b>'+esc(descT(t.give,t.gc))+'</b></div><div>Dai: <b>'+esc(descT(t.get,t.rc))+'</b></div><button class="btn big" data-a="tracc"'+(validTrade(t)?'':' disabled')+'>Acceptă</button><button class="btn ghost" data-a="trdec">Refuză</button></div></div>';
+}
+function trAct(a,i){
+  if(a==='tropen'){
+    if(G.over===null&&!G.trade&&!cp().ai&&mine()&&(G.phase==='roll'||G.phase==='end')){
+      var o=G.pl.map(function(q,k){return k;}).filter(function(k){return k!==G.cur&&!G.pl[k].dead;});
+      TD={to:o[0],give:[],gc:0,get:[],rc:0};G.sheet={t:'trade'};
+    }
+    render();return true;
+  }
+  if(a==='trto'||a==='trg'||a==='trr'){
+    if(TD){
+      if(a==='trto'){TD.to=i;TD.get=[];}
+      else{var l=a==='trg'?TD.give:TD.get,x=l.indexOf(i);if(x>=0)l.splice(x,1);else l.push(i);}
+    }
+    render();return true;
+  }
+  if(a==='trsend'){
+    if(TD&&!G.trade&&!cp().ai&&mine()){
+      var t={from:G.cur,to:TD.to,give:TD.give.slice(),gc:TD.gc|0,get:TD.get.slice(),rc:TD.rc|0,status:'offer'};
+      if(validTrade(t)){G.trade=t;logm(cp().name+' îi propune un schimb lui '+G.pl[t.to].name+'.');TD=null;G.sheet=null;MP.act=true;}
+    }
+    render();return true;
+  }
+  if(a==='trcancel'){
+    if(G.trade&&G.trade.from===G.cur&&mine()){G.trade=null;logm('Oferta a fost retrasă.');MP.act=true;}
+    render();return true;
+  }
+  if(a==='tracc'||a==='trdec'){
+    if(iAmTarget()){resolveTrade(a==='tracc');MP.act=true;}
+    render();return true;
+  }
+  return false;
+}
 
 saved=loadSave();
 render();
