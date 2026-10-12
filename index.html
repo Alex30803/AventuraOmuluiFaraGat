@@ -311,6 +311,60 @@ h1,h2{font-family:var(--f-disp);font-weight:800;text-transform:uppercase;letter-
 <div id="app"></div>
 <script>
 (function(){
+if(window.claude)return;
+var ws=null,ready=null,uid=null,subs={},cols={},docs={},msgH={},peersL=[],pres=null;
+try{uid=sessionStorage.getItem('av-uid');}catch(e){}
+if(!uid){uid='u'+Math.random().toString(36).slice(2,10)+Date.now().toString(36);try{sessionStorage.setItem('av-uid',uid);}catch(e){}}
+function snap(id,d){return {id:id,exists:d!=null,data:function(){return d==null?undefined:d;},metadata:{}};}
+function send(m){if(ws&&ws.readyState===1)ws.send(JSON.stringify(m));}
+function fire(c,ch){var a=Object.keys(c.cache).map(function(id){return snap(id,c.cache[id]);});c.cbs.forEach(function(cb){cb({docs:a,size:a.length,empty:!a.length,docChanges:function(){return ch;},metadata:{}});});}
+function onMsg(e){
+  var m,c;try{m=JSON.parse(e.data);}catch(x){return;}
+  if(m.t==='doc'){(docs[m.path]||[]).slice().forEach(function(cb){cb(snap(m.path.split('/').pop(),m.data));});}
+  else if(m.t==='col'){c=cols[m.path];if(!c)return;var old=c.cache,nw={},ch=[];m.docs.forEach(function(d){nw[d.id]=d.data;});
+    Object.keys(nw).forEach(function(id){if(!(id in old))ch.push({type:'added',doc:snap(id,nw[id])});else if(JSON.stringify(old[id])!==JSON.stringify(nw[id]))ch.push({type:'modified',doc:snap(id,nw[id])});});
+    Object.keys(old).forEach(function(id){if(!(id in nw))ch.push({type:'removed',doc:snap(id,old[id])});});
+    c.cache=nw;fire(c,ch);}
+  else if(m.t==='chg'){c=cols[m.col];if(!c)return;var had=m.id in c.cache,ty;
+    if(m.data==null){delete c.cache[m.id];ty='removed';}else{c.cache[m.id]=m.data;ty=had?'modified':'added';}
+    fire(c,[{type:ty,doc:snap(m.id,m.data)}]);}
+  else if(m.t==='msg'){(msgH[m.topic]||[]).slice().forEach(function(f){try{f({topic:m.topic,data:m.data,isMe:false,peer:m.peer});}catch(x){}});}
+  else if(m.t==='peers'){peersL=m.peers||[];}
+}
+function connect(){return new Promise(function(res,rej){
+  var done=false;ws=new WebSocket((location.protocol==='https:'?'wss://':'ws://')+location.host);
+  ws.onopen=function(){done=true;send({t:'hello'});Object.keys(subs).forEach(function(k){send(subs[k]);});if(pres)send({t:'pres',data:pres});res();};
+  ws.onmessage=onMsg;
+  ws.onerror=function(){if(!done)rej(new Error('ws'));};
+  ws.onclose=function(){if(!done){rej(new Error('ws'));return;}setTimeout(relink,2000);};
+});}
+function relink(){connect().catch(function(){setTimeout(relink,2000);});}
+function connectOnce(){
+  if(!ready){ready=(async function(){for(var i=0;i<8;i++){try{await connect();return;}catch(e){await new Promise(function(r){setTimeout(r,4000);});}}throw new Error('x');})();ready.catch(function(){ready=null;});}
+  return ready;
+}
+setInterval(function(){send({t:'ping'});},25000);
+var db={
+  doc:function(p){return {
+    set:function(d){send({t:'set',path:p,data:d});return Promise.resolve();},
+    delete:function(){send({t:'del',path:p});return Promise.resolve();},
+    onSnapshot:function(cb){(docs[p]=docs[p]||[]).push(cb);var m={t:'subdoc',path:p};subs['d:'+p]=m;send(m);return function(){docs[p]=(docs[p]||[]).filter(function(x){return x!==cb;});};}
+  };},
+  collection:function(p){return {onSnapshot:function(cb){
+    var c=cols[p]=cols[p]||{cache:{},cbs:[]};c.cbs.push(cb);var m={t:'subcol',path:p};subs['c:'+p]=m;send(m);
+    return function(){c.cbs=c.cbs.filter(function(x){return x!==cb;});};
+  }};}
+};
+var room={
+  emit:function(t,d){send({t:'emit',topic:t,data:d});return Promise.resolve();},
+  on:function(t,f){(msgH[t]=msgH[t]||[]).push(f);return function(){msgH[t]=(msgH[t]||[]).filter(function(x){return x!==f;});};},
+  presence:function(p){pres=p;send({t:'pres',data:p});return Promise.resolve();},
+  peers:function(){return peersL;}
+};
+var user={id:function(){return Promise.resolve(uid);}};
+window.claude={use:function(n){return connectOnce().then(function(){return n==='db'?db:(n==='user'?user:(n==='room'?room:null));});}};
+})();
+(function(){
 'use strict';
 var KEY='cartiere-v1';
 var app=document.getElementById('app');
@@ -1245,7 +1299,7 @@ async function mpStart(create,code){
     var db=await claude.use('db'),u=await claude.use('user'),r=await claude.use('room');
     if(!db||!u)throw 0;
     MP.db=db;MP.id=await u.id();MP.room=r;if(!MP.id)throw 0;
-  }catch(e){mpMsg='Online funcționează doar din pagina publicată, cu cont conectat.';render();return;}
+  }catch(e){mpMsg='Nu mă pot conecta la server. Încearcă din nou în câteva secunde.';render();return;}
   mpLeave();
   MP.code=code;MP.on=true;MP.host=create;MP.claimed=false;MP.seats={};MP.names={};MP.n=0;MP.rs=0;
   if(MP.room){MP.room.presence({uid:MP.id});MP.off.push(MP.room.on('sfx',function(m){var d=m.data;if(!d||m.isMe||d.c!==MP.code||typeof d.name!=='string')return;remoteSfx=true;sfx(d.name,+d.d||0);remoteSfx=false;}));}
@@ -1260,7 +1314,7 @@ async function mpStart(create,code){
   }));
   MP.off.push(MP.db.doc('games/'+code).onSnapshot(function(s){if(s.exists)mpApply(s.data());}));
   if(create){MP.act=true;mpMsg='';newGame();}
-  else mpMsg='Aștept camera '+code+'… (dacă nu apare, verifică codul)';
+  else{mpMsg='Aștept camera '+code+'…';setTimeout(function(){if(MP.on&&MP.code===code&&!G){mpMsg='Nu găsesc camera '+code+'. Verifică codul sau cere gazdei să creeze camera.';render();}},6000);}
   render();
 }
 function mpSweep(){
